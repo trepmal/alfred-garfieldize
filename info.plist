@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>kdl-garfieldize</string>
+	<key>connections</key>
+	<dict>
+		<key>A54849E6-E46D-4EDD-8079-B47FEC3C26F9</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C6E2C6E0-4BC1-4C83-AC95-C9C9D4EA3A73</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>BC88E1A5-5AD1-4453-9F8B-1F0DBCB95C56</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C6E2C6E0-4BC1-4C83-AC95-C9C9D4EA3A73</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>F4B74E41-3C67-4885-B977-98FF285AD1DF</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>A54849E6-E46D-4EDD-8079-B47FEC3C26F9</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Kailey Lampert</string>
+	<key>description</key>
+	<string></string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Garfieldize</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>subtext</key>
+				<string>[&lt;style&gt;|]text</string>
+				<key>text</key>
+				<string>Garfieldize</string>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>F4B74E41-3C67-4885-B977-98FF285AD1DF</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>100</integer>
+				<key>script</key>
+				<string>&lt;?php
+
+$query = $argv[1];
+$style = '';
+
+preg_match( "/^(?:([a-z]*)\|)?(.*?)$/", $query, $matches );
+$style = $matches[1];
+$text  = $matches[2];
+
+$text = trim( str_replace( '  ', ' ', $text ) );
+
+$text_length = strlen( $text );
+
+if ( $text_length &lt; 3 ) {
+	$flicker_modulo = 2;
+} elseif ( $text_length &lt; 15 ) {
+	$flicker_modulo = 3;
+} else {
+	$flicker_modulo = 6;
+}
+
+$letters = array_map( function( $i ) use ( $style, $flicker_modulo ) {
+
+	switch ( $style ) {
+		case 'yellow':
+			if ( preg_match('/[a-z0-9\?#\!@]/i', $i ) ) {
+				$i = str_replace(
+					[ '?', '#', '!', '@'],
+					[ 'question', 'hash', 'exclamation', 'at'],
+					$i
+				);
+				$i = ":alphabet-yellow-$i:";
+			}
+		break;
+		case 'white':
+			if ( preg_match('/[a-z0-9\?#\!@]/i', $i ) ) {
+				$i = str_replace(
+					[ '?', '#', '!', '@'],
+					[ 'question', 'hash', 'exclamation', 'at'],
+					$i
+				);
+				$i = ":alphabet-white-$i:";
+			}
+		break;
+		case 'comic':
+			if ( preg_match('/[a-z0-9]/i', $i ) ) {
+				$i = ":comicsans$i:";
+			}
+		break;
+		case 'neon':
+			if ( preg_match('/[a-z]/i', $i ) ) {
+				$i = ":neon-$i:";
+			}
+		break;
+		case 'janky':
+			if ( preg_match('/[a-z]/i', $i ) ) {
+				$i = ":janky-$i:";
+			}
+		break;
+		case 'flicker':
+			if ( preg_match('/[a-z]/i', $i ) ) {
+				$i = sprintf( ":neon-$i%s:", ( rand( 0, 100 ) % $flicker_modulo === 0 ? '-flicker' : '' ) );
+				// $i = sprintf( "&lt;img src='%s'/&gt;", ( rand( 0, 100 ) % $flicker_modulo === 0 ? "flicker/neon-$i-flicker.gif" : "neon-$i.png" ) );
+			}
+		break;
+		case 'intense':
+			if ( preg_match('/[a-z0-9]/i', $i ) ) {
+				$i = ":garfield_$i-intensifies:";
+			}
+		break;
+		case 'garfield':
+		default:
+			if ( preg_match('/[a-z0-9]/i', $i ) ) {
+				$i = ":garfield_$i:";
+			}
+	}
+
+	if ( ' ' === $i ) {
+		$i = ":empty:";
+	}
+	return $i;
+}, str_split( $text, 1 ) );
+
+//header("cache-control: no-store, no-cache, must-revalidate");
+//header("content-type: application/json");
+
+$response = [
+	'response_type' =&gt; 'in_channel',
+	'text' =&gt; implode( $letters ),
+	'text_length' =&gt; $text_length,
+	'modulo' =&gt; $flicker_modulo,
+];
+
+die( $response['text'] );</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>1</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>A54849E6-E46D-4EDD-8079-B47FEC3C26F9</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>autopaste</key>
+				<false/>
+				<key>clipboardtext</key>
+				<string>{query}</string>
+				<key>ignoredynamicplaceholders</key>
+				<false/>
+				<key>transient</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.clipboard</string>
+			<key>uid</key>
+			<string>C6E2C6E0-4BC1-4C83-AC95-C9C9D4EA3A73</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>100</integer>
+				<key>keyword</key>
+				<string>garfieldize</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string></string>
+				<key>script</key>
+				<string>&lt;?php
+
+
+require 'garfieldize.php';</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string></string>
+				<key>title</key>
+				<string>Garfieldize</string>
+				<key>type</key>
+				<integer>1</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>BC88E1A5-5AD1-4453-9F8B-1F0DBCB95C56</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>A54849E6-E46D-4EDD-8079-B47FEC3C26F9</key>
+		<dict>
+			<key>xpos</key>
+			<real>260</real>
+			<key>ypos</key>
+			<real>155</real>
+		</dict>
+		<key>BC88E1A5-5AD1-4453-9F8B-1F0DBCB95C56</key>
+		<dict>
+			<key>xpos</key>
+			<real>150</real>
+			<key>ypos</key>
+			<real>310</real>
+		</dict>
+		<key>C6E2C6E0-4BC1-4C83-AC95-C9C9D4EA3A73</key>
+		<dict>
+			<key>xpos</key>
+			<real>465</real>
+			<key>ypos</key>
+			<real>275</real>
+		</dict>
+		<key>F4B74E41-3C67-4885-B977-98FF285AD1DF</key>
+		<dict>
+			<key>note</key>
+			<string>old version</string>
+			<key>xpos</key>
+			<real>90</real>
+			<key>ypos</key>
+			<real>155</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array/>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>2024.04.10</string>
+	<key>webaddress</key>
+	<string>trepmal.com/alfredapp</string>
+</dict>
+</plist>
